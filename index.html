@@ -20,10 +20,10 @@ nav a{color:#d9c8ff;text-decoration:none;margin-right:22px;font-weight:600;trans
 nav a:last-child{margin-right:0}
 nav a:hover{color:#ff6b9d}
 /* hero */
-.hero{text-align:center;padding:90px 20px 70px;background:radial-gradient(ellipse at top,rgba(255,107,157,.18),transparent 60%)}
-.hero .badge{display:inline-block;background:rgba(255,107,157,.15);border:1px solid rgba(255,107,157,.4);color:#ffb3cd;padding:6px 18px;border-radius:999px;font-weight:700;margin-bottom:22px;font-size:.95rem}
-.hero h1{font-size:3.2rem;font-weight:900;margin-bottom:16px;background:linear-gradient(90deg,#ff6b9d,#ffa94d,#ffd93d);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{font-size:1.25rem;color:#cbb8f0;max-width:640px;margin:0 auto 36px}
+.hero{position:relative;text-align:center;padding:150px 20px 100px;background:linear-gradient(180deg,rgba(26,11,46,.42),rgba(26,11,46,.72) 72%,#1a0b2e 100%),url('cover.jpg') center 28%/cover no-repeat}
+.hero .badge{display:inline-block;background:rgba(26,11,46,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,107,157,.4);color:#ffb3cd;padding:6px 18px;border-radius:999px;font-weight:700;margin-bottom:22px;font-size:.95rem}
+.hero h1{font-size:3.2rem;font-weight:900;margin-bottom:16px;background:linear-gradient(90deg,#ff6b9d,#ffa94d,#ffd93d);-webkit-background-clip:text;background-clip:text;color:transparent};filter:drop-shadow(0 4px 16px rgba(0,0,0,.55))
+.hero p{font-size:1.25rem;color:#efe7ff;max-width:640px;margin:0 auto 36px;text-shadow:0 2px 12px rgba(0,0,0,.65)}
 .btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
 .btn{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:999px;font-weight:700;font-size:1.1rem;text-decoration:none;transition:transform .15s,box-shadow .15s}
 .btn:hover{transform:translateY(-2px)}
@@ -66,9 +66,12 @@ section{padding:70px 0}
 .cta h2{font-size:2rem;font-weight:900;margin-bottom:12px}
 .cta p{margin-bottom:26px;color:#ffe3ec;font-size:1.1rem}
 .cta .btn{background:#fff;color:#e00;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.socials{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+.socials a{display:inline-flex;align-items:center;gap:8px;color:#ffd9ec;text-decoration:none;font-weight:700;padding:9px 20px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(26,11,46,.45);backdrop-filter:blur(6px);transition:background .2s}
+.socials a:hover{background:rgba(26,11,46,.7)}
 footer{text-align:center;padding:44px 20px;color:#8f7cb8;font-size:.95rem}
 footer a{color:#ffb3cd;text-decoration:none}
-@media(max-width:640px){.hero h1{font-size:2.3rem}nav a{margin-right:14px;font-size:.92rem}.sec-title{font-size:1.7rem}}
+@media(max-width:640px){.hero{padding:100px 16px 64px;background:linear-gradient(180deg,rgba(26,11,46,.45),rgba(26,11,46,.75) 72%,#1a0b2e 100%),url('cover.jpg') center 30%/cover no-repeat}.hero h1{font-size:2.3rem}nav a{margin-right:14px;font-size:.92rem}.sec-title{font-size:1.7rem}}
 </style>
 </head>
 <body>
@@ -92,6 +95,11 @@ footer a{color:#ffb3cd;text-decoration:none}
 <div class="btns">
 <a class="btn btn-sub" href="https://www.youtube.com/@mamawlolo_tv?sub_confirmation=1" target="_blank" rel="noopener">▶ اشترك في القناة</a>
 <a class="btn btn-ghost" href="https://youtu.be/kYQR3521quQ" target="_blank" rel="noopener">ابدأ الحكاية من الأول</a>
+</div>
+<div class="socials">
+<a href="https://www.youtube.com/@mamawlolo_tv" target="_blank" rel="noopener">▶ يوتيوب</a>
+<a href="https://www.tiktok.com/@mama.w.lolo" target="_blank" rel="noopener">🎵 تيك توك</a>
+<a href="https://www.facebook.com/mamawlolo.tv" target="_blank" rel="noopener">👍 فيسبوك</a>
 </div>
 </div>
 </div>
@@ -195,7 +203,8 @@ footer a{color:#ffb3cd;text-decoration:none}
 
 <footer>
 <div class="container">
-<p>ماما ولولو | حكايات وقصص كرتون • <a href="https://www.youtube.com/@mamawlolo_tv" target="_blank" rel="noopener">@mamawlolo_tv</a></p>
+<p>ماما ولولو | حكايات وقصص كرتون</p>
+<p><a href="https://www.youtube.com/@mamawlolo_tv" target="_blank" rel="noopener">يوتيوب @mamawlolo_tv</a> • <a href="https://www.tiktok.com/@mama.w.lolo" target="_blank" rel="noopener">تيك توك @mama.w.lolo</a> • <a href="https://www.facebook.com/mamawlolo.tv" target="_blank" rel="noopener">فيسبوك mamawlolo.tv</a></p>
 </div>
 </footer>
 </body>
