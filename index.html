@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ماما ولولو | حكايات وقصص كرتون</title>
+<meta name="description" content="الموقع الرسمي لقناة ماما ولولو - حكايات وقصص كرتون عربية للعيلة: لولو وميدو ونور وماما وبابا. اتفرج على الحكايات بالترتيب واشترك في القناة.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:#1a0b2e;color:#fff;line-height:1.7;overflow-x:hidden}
+.container{max-width:1100px;margin:0 auto;padding:0 20px}
+/* header */
+header{position:sticky;top:0;z-index:50;background:rgba(26,11,46,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08)}
+header .container{display:flex;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px}
+.logo{font-size:1.5rem;font-weight:900;background:linear-gradient(90deg,#ff6b9d,#ffa94d);-webkit-background-clip:text;background-clip:text;color:transparent;text-decoration:none}
+nav a{color:#d9c8ff;text-decoration:none;margin-right:22px;font-weight:600;transition:color .2s}
+nav a:last-child{margin-right:0}
+nav a:hover{color:#ff6b9d}
+/* hero */
+.hero{text-align:center;padding:90px 20px 70px;background:radial-gradient(ellipse at top,rgba(255,107,157,.18),transparent 60%)}
+.hero .badge{display:inline-block;background:rgba(255,107,157,.15);border:1px solid rgba(255,107,157,.4);color:#ffb3cd;padding:6px 18px;border-radius:999px;font-weight:700;margin-bottom:22px;font-size:.95rem}
+.hero h1{font-size:3.2rem;font-weight:900;margin-bottom:16px;background:linear-gradient(90deg,#ff6b9d,#ffa94d,#ffd93d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:1.25rem;color:#cbb8f0;max-width:640px;margin:0 auto 36px}
+.btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:999px;font-weight:700;font-size:1.1rem;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-sub{background:#ff0000;color:#fff;box-shadow:0 8px 30px rgba(255,0,0,.35)}
+.btn-sub:hover{box-shadow:0 12px 36px rgba(255,0,0,.5)}
+.btn-ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff}
+.btn-ghost:hover{background:rgba(255,255,255,.14)}
+/* sections */
+section{padding:70px 0}
+.sec-title{text-align:center;font-size:2.2rem;font-weight:900;margin-bottom:10px}
+.sec-sub{text-align:center;color:#b7a3e3;margin-bottom:44px;font-size:1.1rem}
+/* characters */
+.chars{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px}
+.char{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:28px 18px;text-align:center;transition:transform .2s,border-color .2s}
+.char:hover{transform:translateY(-6px);border-color:rgba(255,107,157,.5)}
+.char .emo{font-size:3.4rem;display:block;margin-bottom:12px}
+.char h3{font-size:1.3rem;font-weight:800;color:#ffb3cd;margin-bottom:6px}
+.char p{font-size:.95rem;color:#cbb8f0}
+/* stories */
+.stories{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.story{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:28px;display:flex;flex-direction:column}
+.story .tag{display:inline-block;background:rgba(255,169,77,.15);color:#ffa94d;border-radius:999px;padding:3px 14px;font-size:.85rem;font-weight:700;margin-bottom:14px;align-self:flex-start}
+.story h3{font-size:1.35rem;font-weight:800;margin-bottom:14px;color:#fff}
+.story ol{list-style:none;counter-reset:ep;margin-bottom:20px;flex:1}
+.story ol li{counter-increment:ep;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.1);color:#d9c8ff;font-size:.98rem;display:flex;gap:10px;align-items:baseline}
+.story ol li:last-child{border-bottom:none}
+.story ol li::before{content:counter(ep);min-width:26px;height:26px;background:linear-gradient(135deg,#ff6b9d,#ffa94d);color:#1a0b2e;font-weight:800;font-size:.85rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center}
+.story a.watch{margin-top:auto;text-align:center;background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.45);color:#ff8080;padding:11px;border-radius:12px;text-decoration:none;font-weight:700;transition:background .2s}
+.story a.watch:hover{background:rgba(255,0,0,.25)}
+.story.featured{grid-column:1/-1;background:linear-gradient(135deg,rgba(255,107,157,.14),rgba(255,169,77,.1));border-color:rgba(255,107,157,.4)}
+/* featured videos */
+.vids{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.vid{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:24px;text-decoration:none;color:#fff;transition:transform .2s,border-color .2s;display:block}
+.vid:hover{transform:translateY(-5px);border-color:rgba(255,217,61,.55)}
+.vid .play{font-size:2rem;display:block;margin-bottom:10px}
+.vid h4{font-size:1.1rem;font-weight:700;color:#ffd93d;margin-bottom:6px}
+.vid p{font-size:.92rem;color:#cbb8f0}
+/* subscribe band */
+.cta{background:linear-gradient(135deg,#ff6b9d,#ff5252);border-radius:26px;text-align:center;padding:56px 26px;margin:20px 0 0}
+.cta h2{font-size:2rem;font-weight:900;margin-bottom:12px}
+.cta p{margin-bottom:26px;color:#ffe3ec;font-size:1.1rem}
+.cta .btn{background:#fff;color:#e00;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+footer{text-align:center;padding:44px 20px;color:#8f7cb8;font-size:.95rem}
+footer a{color:#ffb3cd;text-decoration:none}
+@media(max-width:640px){.hero h1{font-size:2.3rem}nav a{margin-right:14px;font-size:.92rem}.sec-title{font-size:1.7rem}}
+</style>
+</head>
+<body>
+<header>
+<div class="container">
+<a class="logo" href="#">ماما ولولو 🎬</a>
+<nav>
+<a href="#characters">الشخصيات</a>
+<a href="#stories">الحكايات</a>
+<a href="#featured">فيديوهات مختارة</a>
+<a href="https://www.youtube.com/@mamawlolo_tv?sub_confirmation=1" target="_blank" rel="noopener">اشترك</a>
+</nav>
+</div>
+</header>
+
+<div class="hero">
+<div class="container">
+<span class="badge">قناة حكايات وقصص كرتون للعيلة ❤️</span>
+<h1>ماما ولولو</h1>
+<p>حكايات كرتون عربية مليانة مغامرة وضحك ودروس حلوة عن العيلة والأخوات. اتفرج على القصص بالترتيب وعيش مع لولو وميدو ونور كل مغامرة.</p>
+<div class="btns">
+<a class="btn btn-sub" href="https://www.youtube.com/@mamawlolo_tv?sub_confirmation=1" target="_blank" rel="noopener">▶ اشترك في القناة</a>
+<a class="btn btn-ghost" href="https://youtu.be/kYQR3521quQ" target="_blank" rel="noopener">ابدأ الحكاية من الأول</a>
+</div>
+</div>
+</div>
+
+<section id="characters">
+<div class="container">
+<h2 class="sec-title">الشخصيات</h2>
+<p class="sec-sub">أبطال الحكايات اللي بيشاركوا في كل مغامرة</p>
+<div class="chars">
+<div class="char"><span class="emo">👧</span><h3>لولو</h3><p>نجمة القناة وبطلة أغلب الحكايات. بنت فضولية وشجاعة بتحب تكتشف الأسرار.</p></div>
+<div class="char"><span class="emo">👦</span><h3>ميدو</h3><p>روح المرح والمغامرة، دايما في قلب الحدث وبيضحك الكل.</p></div>
+<div class="char"><span class="emo">🧒</span><h3>نور</h3><p>العضو اللي بيكمّل الثلاثي بخيال ودفء في كل مغامرة.</p></div>
+<div class="char"><span class="emo">👩</span><h3>ماما</h3><p>الحنية والحكمة، قلب البيت وصاحبة أجمل المواقف.</p></div>
+<div class="char"><span class="emo">👨</span><h3>بابا</h3><p>السند والضحكة، ولقاءاته مع العيلة دايما ليها طعم تاني.</p></div>
+</div>
+</div>
+</section>
+
+<section id="stories">
+<div class="container">
+<h2 class="sec-title">الحكايات بالترتيب</h2>
+<p class="sec-sub">كل سلسلة مرتبة من أول حلقة لآخرها، اختار حكاية وابدأ</p>
+<div class="stories">
+
+<div class="story featured">
+<span class="tag">⭐ ابدأ من هنا</span>
+<h3>لولو وميدو | كل الأجزاء من الأول للآخر</h3>
+<p style="color:#d9c8ff;margin-bottom:20px">13 فيديو بيجمعوا الحكاية كاملة من أول جزء لآخر جزء. لو لسه جديد على القناة، دي أحسن بداية.</p>
+<a class="watch" href="https://www.youtube.com/playlist?list=PLE2gsZFzAmkM" target="_blank" rel="noopener">شوف السلسلة كاملة ▶</a>
+</div>
+
+<div class="story">
+<span class="tag">7 حلقات</span>
+<h3>سر الأخت التوأم 😱</h3>
+<ol>
+<li>أوضة ماما اتفتحت بعد 10 سنين</li>
+<li>سر القفل القديم</li>
+<li>السر اللي تحت السرير</li>
+<li>سر الشنطة المغلقة</li>
+<li>الجزء الثاني</li>
+<li>الجزء الثالث والأخير</li>
+<li>لولو انفجرت في وش ماما</li>
+</ol>
+<a class="watch" href="https://www.youtube.com/playlist?list=PLV431VM7AFZ4" target="_blank" rel="noopener">شوف السلسلة ▶</a>
+</div>
+
+<div class="story">
+<span class="tag">6 حلقات</span>
+<h3>الأخوة والتضحية 💔</h3>
+<ol>
+<li>أخوها جه يزورها (ج1)</li>
+<li>ندم لولو (ج2)</li>
+<li>ميدو باع لعبته</li>
+<li>ميدو كسر حصالته</li>
+<li>سر الكيس الأسود</li>
+<li>الورقة اللي لقتها لولو</li>
+</ol>
+<a class="watch" href="https://www.youtube.com/playlist?list=PLbWidZBCWflQ" target="_blank" rel="noopener">شوف السلسلة ▶</a>
+</div>
+
+<div class="story">
+<span class="tag">7 حلقات</span>
+<h3>مغامرات لولو وميدو ونور 🗝️</h3>
+<ol>
+<li>الصندوق اللي بيخبط (ج1)</li>
+<li>السر اللي مستخبي فوق البيت (ج2)</li>
+<li>القلادة بتخبي سر خطير (ج3)</li>
+<li>ممنوع فتح الصندوق</li>
+<li>بابا خبّى ظرف غريب في البيت</li>
+<li>لولو وميدو والبيت المسحور</li>
+<li>السر الغامض في الحديقة</li>
+</ol>
+<a class="watch" href="https://www.youtube.com/playlist?list=PLT6ZPD6Lb_dc" target="_blank" rel="noopener">شوف السلسلة ▶</a>
+</div>
+
+</div>
+</div>
+</section>
+
+<section id="featured">
+<div class="container">
+<h2 class="sec-title">فيديوهات مختارة</h2>
+<p class="sec-sub">لقطات من آخر وأجمل الحكايات</p>
+<div class="vids">
+<a class="vid" href="https://www.youtube.com/watch?v=uPdkJE7Z7Kg" target="_blank" rel="noopener"><span class="play">▶️</span><h4>الجزء التاسع: بابا رجع! 😭🗼</h4><p>لقاء بعد سنين في الفنار، من أكتر الأجزاء اللي أثرت في المتابعين.</p></a>
+<a class="vid" href="https://youtu.be/uyjjUqGG9is" target="_blank" rel="noopener"><span class="play">▶️</span><h4>لولو وميدو والبيت المسحور 🏚️</h4><p>ألغاز وشبح غامض في مغامرة طويلة جديدة.</p></a>
+<a class="vid" href="https://youtu.be/kYQR3521quQ" target="_blank" rel="noopener"><span class="play">▶️</span><h4>ابدأ من الأول 🔑</h4><p>أول حلقة في الحكاية، البداية الصح لأي متابع جديد.</p></a>
+</div>
+</div>
+</section>
+
+<section>
+<div class="container">
+<div class="cta">
+<h2>لسه مشتركتش؟ 👀</h2>
+<p>اشترك في قناة ماما ولولو عشان توصلك كل حكاية جديدة أول بأول.</p>
+<a class="btn" href="https://www.youtube.com/@mamawlolo_tv?sub_confirmation=1" target="_blank" rel="noopener">▶ اشترك دلوقتي</a>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="container">
+<p>ماما ولولو | حكايات وقصص كرتون • <a href="https://www.youtube.com/@mamawlolo_tv" target="_blank" rel="noopener">@mamawlolo_tv</a></p>
+</div>
+</footer>
+</body>
+</html>
