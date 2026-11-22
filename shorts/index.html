@@ -300,7 +300,7 @@ async function ensureFF(){
   ffLoading = true;
   prog(0.02,'بيجهّز محرك القص أول مرة…');
   const {createFFmpeg, fetchFile} = FFmpeg;
-  ffmpeg = createFFmpeg({log:true, corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core-st@0.11.0/dist/ffmpeg-core.js'});
+  ffmpeg = createFFmpeg({log:true, corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js'});
   ffmpeg.setLogger(({message})=>logLine(message));
   await ffmpeg.load();
   window.__fetchFile = fetchFile;
