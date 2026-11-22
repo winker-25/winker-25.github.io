@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>صانع الشورتس — سكريبت + قص السكتات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --card:#161b26; --card2:#1c2333; --line:#2a3348;
+    --txt:#eef1f6; --mut:#9aa4b8; --acc:#7c5cff; --acc2:#00d4a6; --warn:#ffb020; --err:#ff5c6c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  body{background:var(--bg); color:var(--txt); font-family:'Cairo',system-ui,sans-serif; min-height:100vh; padding-bottom:60px}
+  .wrap{max-width:640px; margin:0 auto; padding:16px}
+  header.app{text-align:center; padding:22px 0 6px}
+  header.app h1{font-size:26px; font-weight:900}
+  header.app p{color:var(--mut); font-size:14px; margin-top:4px}
+  .tabs{display:flex; gap:8px; margin:18px 0}
+  .tabs button{flex:1; padding:12px; border-radius:14px; border:1px solid var(--line); background:var(--card); color:var(--mut); font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; transition:.15s}
+  .tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px}
+  label{display:block; font-size:14px; font-weight:700; margin:14px 0 6px; color:var(--txt)}
+  label small{color:var(--mut); font-weight:400}
+  textarea,input[type=text]{width:100%; background:var(--card2); border:1px solid var(--line); border-radius:12px; color:var(--txt); font-family:inherit; font-size:16px; padding:12px; resize:vertical}
+  textarea:focus,input:focus{outline:none; border-color:var(--acc)}
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chips button{padding:9px 16px; border-radius:999px; border:1px solid var(--line); background:var(--card2); color:var(--mut); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer}
+  .chips button.on{background:var(--acc2); border-color:var(--acc2); color:#06281f}
+  .row{display:flex; gap:12px}
+  .row>div{flex:1}
+  .btn{width:100%; padding:15px; border:none; border-radius:14px; background:var(--acc); color:#fff; font-family:inherit; font-size:17px; font-weight:900; cursor:pointer; margin-top:16px}
+  .btn:disabled{opacity:.45; cursor:not-allowed}
+  .btn.alt{background:var(--card2); border:1px solid var(--line); color:var(--txt); font-weight:700; font-size:15px; padding:12px}
+  .btn.green{background:var(--acc2); color:#06281f}
+  .stat{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--line); font-size:14px}
+  .stat:last-child{border-bottom:none}
+  .stat b{color:var(--acc2)}
+  .sec{border-radius:14px; padding:14px; margin-top:12px; background:var(--card2); border:1px solid var(--line)}
+  .sec .tag{display:inline-block; font-size:12px; font-weight:900; padding:3px 10px; border-radius:999px; margin-bottom:8px}
+  .tag.hook{background:#3a2d6b; color:#c9b8ff}
+  .tag.build{background:#173a4a; color:#7fd8ff}
+  .tag.loop{background:#3d2c12; color:#ffcf7a}
+  .sec p{line-height:1.9; font-size:16px}
+  .sec .meta{color:var(--mut); font-size:12px; margin-top:8px}
+  .loopbox{background:#241a08; border:1px dashed var(--warn); border-radius:14px; padding:14px; margin-top:12px; font-size:14px; line-height:1.9}
+  .loopbox b{color:var(--warn)}
+  .drop{border:2px dashed var(--line); border-radius:18px; padding:34px 16px; text-align:center; color:var(--mut); cursor:pointer; transition:.15s}
+  .drop.over,.drop:hover{border-color:var(--acc); color:var(--txt)}
+  .drop b{display:block; font-size:17px; margin-bottom:6px; color:var(--txt)}
+  video{width:100%; border-radius:14px; margin-top:12px; background:#000}
+  .log{background:#0a0d13; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font-size:12px; color:var(--mut); font-family:monospace; direction:ltr; text-align:left; max-height:120px; overflow-y:auto; white-space:pre-wrap; margin-top:12px}
+  .bar{height:8px; background:var(--card2); border-radius:999px; overflow:hidden; margin-top:12px}
+  .bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--acc),var(--acc2)); transition:width .3s}
+  .note{font-size:13px; color:var(--mut); margin-top:10px; line-height:1.8}
+  .err{background:#33161b; border:1px solid var(--err); color:#ffb3bc; border-radius:12px; padding:12px; font-size:14px; margin-top:12px; display:none}
+  .spin{display:inline-block; width:18px; height:18px; border:3px solid #ffffff55; border-top-color:#fff; border-radius:50%; animation:sp 1s linear infinite; vertical-align:-4px; margin-left:8px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .hidden{display:none}
+  .rangeval{color:var(--acc2); font-weight:900}
+  input[type=range]{width:100%; accent-color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <h1>🎬 صانع الشورتس</h1>
+    <p>اكتب سكريبت بهوك ونهاية لولبية… واقصّ السكتات من الفيديو — كل ده في حتة واحدة</p>
+  </header>
+
+  <div class="tabs">
+    <button id="tabScript" class="on" type="button">✍️ السكريبت</button>
+    <button id="tabCut" type="button">✂️ قص السكتات</button>
+  </div>
+
+  <!-- ===== SCRIPT PLANNER ===== -->
+  <section id="pageScript">
+    <div class="card">
+      <label>موضوع الفيديو</label>
+      <textarea id="topic" rows="3" placeholder="مثال: عادات الأغنياء الصباحية، أو: لولو أول مرة تخرج مع صحابها لوحدها"></textarea>
+
+      <label>مدة الفيديو</label>
+      <div class="chips" id="durChips">
+        <button type="button" data-d="15">15 ثانية</button>
+        <button type="button" data-d="30" class="on">30 ثانية</button>
+        <button type="button" data-d="45">45 ثانية</button>
+        <button type="button" data-d="60">60 ثانية</button>
+      </div>
+
+      <label>سرعة الإلقاء: <span class="rangeval" id="wpmVal">130</span> كلمة في الدقيقة</label>
+      <input type="range" id="wpm" min="100" max="180" value="130">
+      <div class="note">العامية المصرية في الفويس أوفر بتبقى عادة بين 120 و140 كلمة في الدقيقة. الهدف: <b id="targetWords" style="color:var(--acc2)">65</b> كلمة.</div>
+
+      <button class="btn" id="genBtn" type="button">⚡ اكتب السكريبت</button>
+      <div class="err" id="scriptErr"></div>
+    </div>
+
+    <div class="card hidden" id="resultCard">
+      <div class="stat"><span>عدد الكلمات الكلي</span><b id="stWords">—</b></div>
+      <div class="stat"><span>المدة التقديرية على سرعتك</span><b id="stDur">—</b></div>
+      <div class="stat"><span>الهوك</span><b id="stHook">—</b></div>
+
+      <div id="secsOut"></div>
+
+      <div class="loopbox" id="loopBox"></div>
+
+      <button class="btn green" id="copyBtn" type="button">📋 نسخ السكريبت كله</button>
+      <button class="btn alt" id="regenBtn" type="button">🔄 جرّب نسخة تانية</button>
+    </div>
+  </section>
+
+  <!-- ===== SILENCE CUTTER ===== -->
+  <section id="pageCut" class="hidden">
+    <div class="card">
+      <div class="drop" id="drop">
+        <b>📹 ارفع الفيديو هنا</b>
+        دوس للاختيار أو اسحب الملف — المعالجة كلها على جهازك، مفيش حاجة بتترفع لأي سيرفر
+      </div>
+      <input type="file" id="fileIn" accept="video/*" style="display:none">
+      <div class="note" id="fileInfo"></div>
+
+      <div class="row">
+        <div>
+          <label>حساسية السكتة</label>
+          <div class="chips" id="dbChips">
+            <button type="button" data-v="-25">عالية</button>
+            <button type="button" data-v="-30" class="on">وسط</button>
+            <button type="button" data-v="-40">منخفضة</button>
+          </div>
+        </div>
+        <div>
+          <label>أقل مدة للسكتة</label>
+          <div class="chips" id="minChips">
+            <button type="button" data-v="0.3">0.3 ث</button>
+            <button type="button" data-v="0.5" class="on">0.5 ث</button>
+            <button type="button" data-v="1">1 ث</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" id="cutBtn" type="button" disabled>✂️ قص السكتات</button>
+      <div class="note" id="loadNote">أول مرة بتجهّز المحرك (حوالي 25 ميجا نت) وبعدها بيشتغل فورًا.</div>
+      <div class="err" id="cutErr"></div>
+      <div class="bar hidden" id="progWrap"><i id="progBar"></i></div>
+      <div class="note" id="progTxt"></div>
+      <div class="log hidden" id="logBox"></div>
+    </div>
+
+    <div class="card hidden" id="cutResult">
+      <div class="stat"><span>المدة الأصلية</span><b id="cBefore">—</b></div>
+      <div class="stat"><span>المدة بعد القص</span><b id="cAfter">—</b></div>
+      <div class="stat"><span>اتوفّر</span><b id="cSaved">—</b></div>
+      <div class="stat"><span>عدد السكتات اللي اتشالت</span><b id="cCount">—</b></div>
+      <video id="outVid" controls playsinline></video>
+      <a id="dlBtn" class="btn green" style="display:block; text-align:center; text-decoration:none" download>⬇️ تحميل الفيديو المقصوص</a>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- tabs ---------- */
+const $ = s => document.querySelector(s);
+function chipGroup(el, cb){
+  el.addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    el.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); cb && cb(b);
+  });
+}
+$('#tabScript').onclick = ()=>{ $('#tabScript').classList.add('on'); $('#tabCut').classList.remove('on'); $('#pageScript').classList.remove('hidden'); $('#pageCut').classList.add('hidden'); };
+$('#tabCut').onclick = ()=>{ $('#tabCut').classList.add('on'); $('#tabScript').classList.remove('on'); $('#pageCut').classList.remove('hidden'); $('#pageScript').classList.add('hidden'); };
+
+/* ---------- script planner ---------- */
+let dur = 30, wpm = 130;
+const words = t => (t.trim().match(/[\u0600-\u06FF\w]+/g)||[]).length;
+function targetWords(){ return Math.round(dur * wpm / 60); }
+function refreshTarget(){ $('#wpmVal').textContent = wpm; $('#targetWords').textContent = targetWords(); }
+chipGroup($('#durChips'), b=>{ dur = +b.dataset.d; refreshTarget(); });
+$('#wpm').addEventListener('input', e=>{ wpm = +e.target.value; refreshTarget(); });
+refreshTarget();
+
+function extractJSON(txt){
+  let t = txt.replace(/```json|```/g,'').trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if(a<0||b<=a) throw new Error('no json');
+  return JSON.parse(t.slice(a,b+1));
+}
+
+async function callAI(topic){
+  const tw = targetWords();
+  const sys = 'انت كاتب سكريبت محترف لفيديوهات شورتس بالعامية المصرية. بترد بصيغة JSON فقط بدون أي كلام زيادة.';
+  const usr = 'اكتب سكريبت فيديو شورت مدته '+dur+' ثانية عن الموضوع: «'+topic+'».\n'+
+  'عدد الكلمات المستهدف حوالي '+tw+' كلمة بالعامية المصرية الطبيعية.\n'+
+  'القواعد:\n'+
+  '1. "hook": جملة افتتاحية تخطف المشاهد في أول 3 ثواني (حتى 12 كلمة).\n'+
+  '2. "scenes": مصفوفة من 3 لـ 6 جمل قصيرة تبني الموضوع بسرعة، كل جملة معلومة واحدة.\n'+
+  '3. "ending": جملة أخيرة غير مكتملة المعنى بحيث لو اتقرأت وراها جملة الـ hook تكملها بشكل طبيعي، عشان المشاهد يعيد الفيديو من غير ما يحس (الحلقة اللانهائية).\n'+
+  'رجّع JSON بالشكل ده بالظبط: {"hook":"...","scenes":["...","..."],"ending":"..."}';
+  const res = await fetch('https://text.pollinations.ai/', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({model:'openai', private:true, messages:[{role:'system',content:sys},{role:'user',content:usr}]})
+  });
+  if(!res.ok) throw new Error('السيرفر رجّع خطأ '+res.status);
+  return extractJSON(await res.text());
+}
+
+let lastScript = null;
+function fmtSec(s){ return s<60 ? Math.round(s)+' ثانية' : Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0')+' دقيقة'; }
+
+function renderScript(d){
+  lastScript = d;
+  const hook = String(d.hook||'').trim();
+  const scenes = Array.isArray(d.scenes)? d.scenes.map(s=>String(s).trim()).filter(Boolean) : [];
+  const ending = String(d.ending||'').trim();
+  const all = [hook].concat(scenes).concat([ending]);
+  const totalW = all.reduce((n,s)=>n+words(s),0);
+  const est = totalW / wpm * 60;
+  $('#stWords').textContent = totalW+' كلمة (الهدف '+targetWords()+')';
+  $('#stDur').textContent = fmtSec(est);
+  $('#stHook').textContent = words(hook)+' كلمة / ~'+Math.round(words(hook)/wpm*60)+' ث';
+  let html = '<div class="sec"><span class="tag hook">🎯 الهوك — أول 3 ثواني</span><p>'+hook+'</p></div>';
+  scenes.forEach((s,i)=>{
+    html += '<div class="sec"><span class="tag build">🧱 بناء '+(i+1)+' — ~'+Math.round(words(s)/wpm*60)+' ث</span><p>'+s+'</p></div>';
+  });
+  html += '<div class="sec"><span class="tag loop">♾️ النهاية اللولبية</span><p>'+ending+'</p><div class="meta">متقصدة تفضل معلّقة عشان تكمل على الهوك</div></div>';
+  $('#secsOut').innerHTML = html;
+  $('#loopBox').innerHTML = '<b>الحلقة اللانهائية هتسمع كده:</b><br>«…'+ending+' '+hook+'» — المشاهد هيحس إن الفيديو لسه شغال فيعيده من الأول، وده بيرفع نسبة المشاهدة.';
+  $('#resultCard').classList.remove('hidden');
+  $('#resultCard').scrollIntoView({behavior:'smooth'});
+}
+
+async function generate(){
+  const topic = $('#topic').value.trim();
+  if(!topic){ $('#topic').focus(); return; }
+  const btn = $('#genBtn'); btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> بيكتب…';
+  $('#scriptErr').style.display='none';
+  try{
+    const d = await callAI(topic);
+    renderScript(d);
+  }catch(e){
+    const el = $('#scriptErr'); el.style.display='block';
+    el.textContent = 'حصلت مشكلة في التوليد ('+e.message+'). جرّب تاني.';
+  }finally{
+    btn.disabled = false; btn.textContent = '⚡ اكتب السكريبت';
+  }
+}
+$('#genBtn').onclick = generate;
+$('#regenBtn').onclick = generate;
+$('#copyBtn').onclick = async ()=>{
+  if(!lastScript) return;
+  const d = lastScript;
+  const txt = ['🎯 الهوك: '+d.hook]
+    .concat((d.scenes||[]).map((s,i)=>'🧱 '+(i+1)+': '+s))
+    .concat(['♾️ النهاية: '+d.ending]).join('\n');
+  try{ await navigator.clipboard.writeText(txt); }
+  catch(e){
+    const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  $('#copyBtn').textContent = '✅ اتنسخ!';
+  setTimeout(()=>$('#copyBtn').textContent='📋 نسخ السكريبت كله',1500);
+};
+
+/* ---------- silence cutter ---------- */
+let db = -30, minSil = 0.5, inFile = null, ffmpeg = null, ffReady = false, ffLoading = false;
+chipGroup($('#dbChips'), b=>{ db = +b.dataset.v; });
+chipGroup($('#minChips'), b=>{ minSil = +b.dataset.v; });
+
+const drop = $('#drop'), fileIn = $('#fileIn');
+drop.onclick = ()=>fileIn.click();
+drop.ondragover = e=>{ e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = ()=>drop.classList.remove('over');
+drop.ondrop = e=>{ e.preventDefault(); drop.classList.remove('over'); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); };
+fileIn.onchange = ()=>{ if(fileIn.files[0]) setFile(fileIn.files[0]); };
+
+function setFile(f){
+  inFile = f;
+  $('#fileInfo').innerHTML = 'الملف: <b style="color:var(--txt)">'+f.name+'</b> — '+(f.size/1048576).toFixed(1)+' ميجا'+(f.size>314572800?'<br><span style="color:var(--warn)">الملف كبير، القص ممكن ياخد وقت أو يفشل على الموبايل. الأفضل فيديو أقل من 300 ميجا.</span>':'');
+  $('#cutBtn').disabled = false;
+  $('#cutResult').classList.add('hidden');
+}
+
+function logLine(s){
+  const lb = $('#logBox'); lb.classList.remove('hidden');
+  lb.textContent = (lb.textContent+'\n'+s).slice(-3000);
+  lb.scrollTop = lb.scrollHeight;
+}
+function prog(p, txt){
+  $('#progWrap').classList.remove('hidden');
+  $('#progBar').style.width = Math.round(p*100)+'%';
+  if(txt) $('#progTxt').textContent = txt;
+}
+
+async function ensureFF(){
+  if(ffReady) return;
+  if(ffLoading){ while(!ffReady) await new Promise(r=>setTimeout(r,300)); return; }
+  ffLoading = true;
+  prog(0.02,'بيجهّز محرك القص أول مرة…');
+  const {createFFmpeg, fetchFile} = FFmpeg;
+  ffmpeg = createFFmpeg({log:true, corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'});
+  ffmpeg.setLogger(({message})=>logLine(message));
+  await ffmpeg.load();
+  window.__fetchFile = fetchFile;
+  ffReady = true;
+}
+
+function parseSilences(logs){
+  const starts = [], ends = [];
+  for(const m of logs){
+    let x = m.match(/silence_start:\s*([\d.]+)/); if(x) starts.push(parseFloat(x[1]));
+    x = m.match(/silence_end:\s*([\d.]+)\s*\|\s*silence_duration:\s*([\d.]+)/); if(x) ends.push(parseFloat(x[1]));
+  }
+  const n = Math.min(starts.length, ends.length);
+  const sil = [];
+  for(let i=0;i<n;i++) sil.push([starts[i], ends[i]]);
+  sil.sort((a,b)=>a[0]-b[0]);
+  return sil;
+}
+
+async function cutSilence(){
+  if(!inFile) return;
+  const btn = $('#cutBtn'); btn.disabled = true;
+  $('#cutErr').style.display='none';
+  $('#logBox').textContent=''; $('#logBox').classList.add('hidden');
+  $('#cutResult').classList.add('hidden');
+  try{
+    await ensureFF();
+    prog(0.08,'بيقرأ الفيديو…');
+    const ext = (inFile.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'') || 'mp4';
+    const inName = 'input.'+ext;
+    // probe duration via video element
+    const vidDur = await new Promise((res,rej)=>{
+      const v = document.createElement('video'); v.preload='metadata';
+      v.onloadedmetadata = ()=>{ res(v.duration); URL.revokeObjectURL(v.src); };
+      v.onerror = ()=>rej(new Error('مش قادر يقرأ الفيديو ده'));
+      v.src = URL.createObjectURL(inFile);
+    });
+    ffmpeg.FS('writeFile', inName, await window.__fetchFile(inFile));
+
+    // 1) detect silences
+    prog(0.15,'بيدور على السكتات…');
+    let logs = [];
+    const origLogger = ({message})=>{ logs.push(message); logLine(message); };
+    ffmpeg.setLogger(origLogger);
+    try{ await ffmpeg.run('-i',inName,'-af','silencedetect=noise='+db+'dB:d='+minSil,'-f','null','-'); }catch(e){ /* ffmpeg returns non-zero on null muxer sometimes */ }
+    const sil = parseSilences(logs);
+
+    // 2) compute speech segments
+    const segs = []; let prev = 0;
+    for(const [s,e] of sil){ if(s > prev + 0.05) segs.push([prev, s]); prev = Math.max(prev, e); }
+    if(prev < vidDur - 0.05) segs.push([prev, vidDur]);
+    const kept = segs.filter(([a,b])=> b-a >= 0.15);
+
+    if(sil.length === 0 || kept.length === segs.length && segs.length === 1 && sil.length === 0){
+      throw new Error('ملقيتش سكتات بالإعدادات دي. جرّب تخلي الحساسية «عالية» أو تقلل أقل مدة.');
+    }
+    if(kept.length === 0) throw new Error('الفيديو كله سكتة بالإعدادات دي! قلل الحساسية.');
+
+    // 3) cut + concat
+    prog(0.3,'بيقص ويلزّق… (الخطوة دي أطول واحدة)');
+    const parts = [];
+    let fc = '';
+    kept.forEach(([a,b],i)=>{
+      fc += '[0:v]trim=start='+a.toFixed(3)+':end='+b.toFixed(3)+',setpts=PTS-STARTPTS[v'+i+'];';
+      fc += '[0:a]atrim=start='+a.toFixed(3)+':end='+b.toFixed(3)+',asetpts=PTS-STARTPTS[a'+i+'];';
+      parts.push('[v'+i+'][a'+i+']');
+    });
+    fc += parts.join('')+'concat=n='+kept.length+':v=1:a=1[v][a]';
+    ffmpeg.setProgress(({ratio})=>prog(0.3 + Math.min(Math.max(ratio,0),1)*0.65, 'بيencode الفيديو الجديد… '+Math.round(Math.min(Math.max(ratio,0),1)*100)+'%'));
+    const outName = 'output.mp4';
+    let args = ['-i',inName,'-filter_complex',fc,'-map','[v]','-map','[a]','-c:v','libx264','-preset','veryfast','-crf','23','-c:a','aac','-movflags','+faststart',outName];
+    try{ await ffmpeg.run(...args); }
+    catch(e){
+      logLine('x264 failed, retrying mpeg4: '+e.message);
+      args = ['-i',inName,'-filter_complex',fc,'-map','[v]','-map','[a]','-c:v','mpeg4','-q:v','5','-c:a','aac',outName];
+      await ffmpeg.run(...args);
+    }
+
+    // 4) deliver
+    const data = ffmpeg.FS('readFile', outName);
+    const blob = new Blob([data.buffer], {type:'video/mp4'});
+    const url = URL.createObjectURL(blob);
+    const outDur = kept.reduce((n,[a,b])=>n+(b-a),0);
+    $('#cBefore').textContent = fmtSec(vidDur);
+    $('#cAfter').textContent = fmtSec(outDur);
+    $('#cSaved').textContent = fmtSec(Math.max(vidDur-outDur,0))+' ('+Math.round((1-outDur/vidDur)*100)+'%)';
+    $('#cCount').textContent = sil.length;
+    $('#outVid').src = url;
+    const dl = $('#dlBtn'); dl.href = url; dl.download = inFile.name.replace(/\.[^.]+$/,'')+'-بدون-سكتات.mp4';
+    $('#cutResult').classList.remove('hidden');
+    prog(1,'خلص ✅');
+    try{ ffmpeg.FS('unlink', inName); ffmpeg.FS('unlink', outName); }catch(e){}
+    $('#cutResult').scrollIntoView({behavior:'smooth'});
+  }catch(e){
+    const el = $('#cutErr'); el.style.display='block';
+    el.textContent = e.message && e.message.includes('ملقيتش') || (e.message||'').includes('كله سكتة') ? e.message : 'حصلت مشكلة أثناء القص. لو الفيديو كبير جرّب تضغطه الأول أو تفتح الصفحة من موبايل أحدث.';
+    logLine('ERROR: '+(e.message||e));
+  }finally{
+    btn.disabled = false;
+  }
+}
+$('#cutBtn').onclick = cutSilence;
+</script>
+</body>
+</html>
