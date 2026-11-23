@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/umd/ffmpeg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/umd/index.js"></script>
 <style>
   :root{
     --bg:#0d1117; --card:#161b26; --card2:#1c2333; --line:#2a3348;
@@ -142,7 +143,7 @@
       </div>
 
       <button class="btn" id="cutBtn" type="button" disabled>✂️ قص السكتات</button>
-      <div class="note" id="loadNote">أول مرة بتجهّز المحرك (حوالي 25 ميجا نت) وبعدها بيشتغل فورًا.</div>
+      <div class="note" id="loadNote">أول مرة بتجهّز المحرك (حوالي 30 ميجا نت) وبعدها بيشتغل فورًا.</div>
       <div class="err" id="cutErr"></div>
       <div class="bar hidden" id="progWrap"><i id="progBar"></i></div>
       <div class="note" id="progTxt"></div>
@@ -264,8 +265,9 @@ $('#copyBtn').onclick = async ()=>{
   setTimeout(()=>$('#copyBtn').textContent='📋 نسخ السكريبت كله',1500);
 };
 
-/* ---------- silence cutter ---------- */
+/* ---------- silence cutter (ffmpeg.wasm 0.12) ---------- */
 let db = -30, minSil = 0.5, inFile = null, ffmpeg = null, ffReady = false, ffLoading = false;
+const CORE_BASE = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
 chipGroup($('#dbChips'), b=>{ db = +b.dataset.v; });
 chipGroup($('#minChips'), b=>{ minSil = +b.dataset.v; });
 
@@ -299,11 +301,12 @@ async function ensureFF(){
   if(ffLoading){ while(!ffReady) await new Promise(r=>setTimeout(r,300)); return; }
   ffLoading = true;
   prog(0.02,'بيجهّز محرك القص أول مرة…');
-  const {createFFmpeg, fetchFile} = FFmpeg;
-  ffmpeg = createFFmpeg({log:true, corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js'});
-  ffmpeg.setLogger(({message})=>logLine(message));
-  await ffmpeg.load();
-  window.__fetchFile = fetchFile;
+  ffmpeg = new FFmpegWASM.FFmpeg();
+  ffmpeg.on('log', ({message})=>logLine(message));
+  await ffmpeg.load({
+    coreURL: await FFmpegUtil.toBlobURL(CORE_BASE+'/ffmpeg-core.js','text/javascript'),
+    wasmURL: await FFmpegUtil.toBlobURL(CORE_BASE+'/ffmpeg-core.wasm','application/wasm')
+  });
   ffReady = true;
 }
 
@@ -331,21 +334,21 @@ async function cutSilence(){
     prog(0.08,'بيقرأ الفيديو…');
     const ext = (inFile.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'') || 'mp4';
     const inName = 'input.'+ext;
-    // probe duration via video element
     const vidDur = await new Promise((res,rej)=>{
       const v = document.createElement('video'); v.preload='metadata';
       v.onloadedmetadata = ()=>{ res(v.duration); URL.revokeObjectURL(v.src); };
       v.onerror = ()=>rej(new Error('مش قادر يقرأ الفيديو ده'));
       v.src = URL.createObjectURL(inFile);
     });
-    ffmpeg.FS('writeFile', inName, await window.__fetchFile(inFile));
+    await ffmpeg.writeFile(inName, await FFmpegUtil.fetchFile(inFile));
 
     // 1) detect silences
     prog(0.15,'بيدور على السكتات…');
     let logs = [];
-    const origLogger = ({message})=>{ logs.push(message); logLine(message); };
-    ffmpeg.setLogger(origLogger);
-    try{ await ffmpeg.run('-i',inName,'-af','silencedetect=noise='+db+'dB:d='+minSil,'-f','null','-'); }catch(e){ /* ffmpeg returns non-zero on null muxer sometimes */ }
+    const onLog = ({message})=>{ logs.push(message); };
+    ffmpeg.on('log', onLog);
+    await ffmpeg.exec(['-i',inName,'-af','silencedetect=noise='+db+'dB:d='+minSil,'-f','null','-']);
+    ffmpeg.off('log', onLog);
     const sil = parseSilences(logs);
 
     // 2) compute speech segments
@@ -354,7 +357,7 @@ async function cutSilence(){
     if(prev < vidDur - 0.05) segs.push([prev, vidDur]);
     const kept = segs.filter(([a,b])=> b-a >= 0.15);
 
-    if(sil.length === 0 || kept.length === segs.length && segs.length === 1 && sil.length === 0){
+    if(sil.length === 0){
       throw new Error('ملقيتش سكتات بالإعدادات دي. جرّب تخلي الحساسية «عالية» أو تقلل أقل مدة.');
     }
     if(kept.length === 0) throw new Error('الفيديو كله سكتة بالإعدادات دي! قلل الحساسية.');
@@ -369,19 +372,20 @@ async function cutSilence(){
       parts.push('[v'+i+'][a'+i+']');
     });
     fc += parts.join('')+'concat=n='+kept.length+':v=1:a=1[v][a]';
-    ffmpeg.setProgress(({ratio})=>prog(0.3 + Math.min(Math.max(ratio,0),1)*0.65, 'بيencode الفيديو الجديد… '+Math.round(Math.min(Math.max(ratio,0),1)*100)+'%'));
+    const onProg = ({progress})=>prog(0.3 + Math.min(Math.max(progress,0),1)*0.65, 'بيencode الفيديو الجديد… '+Math.round(Math.min(Math.max(progress,0),1)*100)+'%');
+    ffmpeg.on('progress', onProg);
     const outName = 'output.mp4';
-    let args = ['-i',inName,'-filter_complex',fc,'-map','[v]','-map','[a]','-c:v','libx264','-preset','veryfast','-crf','23','-c:a','aac','-movflags','+faststart',outName];
-    try{ await ffmpeg.run(...args); }
-    catch(e){
-      logLine('x264 failed, retrying mpeg4: '+e.message);
-      args = ['-i',inName,'-filter_complex',fc,'-map','[v]','-map','[a]','-c:v','mpeg4','-q:v','5','-c:a','aac',outName];
-      await ffmpeg.run(...args);
+    let ret = await ffmpeg.exec(['-i',inName,'-filter_complex',fc,'-map','[v]','-map','[a]','-c:v','libx264','-preset','veryfast','-crf','23','-c:a','aac','-movflags','+faststart',outName]);
+    if(ret !== 0){
+      logLine('x264 failed, retrying mpeg4');
+      ret = await ffmpeg.exec(['-i',inName,'-filter_complex',fc,'-map','[v]','-map','[a]','-c:v','mpeg4','-q:v','5','-c:a','aac',outName]);
     }
+    ffmpeg.off('progress', onProg);
+    if(ret !== 0) throw new Error('encode failed');
 
     // 4) deliver
-    const data = ffmpeg.FS('readFile', outName);
-    const blob = new Blob([data.buffer], {type:'video/mp4'});
+    const data = await ffmpeg.readFile(outName);
+    const blob = new Blob([data.buffer ? data.buffer : data], {type:'video/mp4'});
     const url = URL.createObjectURL(blob);
     const outDur = kept.reduce((n,[a,b])=>n+(b-a),0);
     $('#cBefore').textContent = fmtSec(vidDur);
@@ -392,12 +396,13 @@ async function cutSilence(){
     const dl = $('#dlBtn'); dl.href = url; dl.download = inFile.name.replace(/\.[^.]+$/,'')+'-بدون-سكتات.mp4';
     $('#cutResult').classList.remove('hidden');
     prog(1,'خلص ✅');
-    try{ ffmpeg.FS('unlink', inName); ffmpeg.FS('unlink', outName); }catch(e){}
+    try{ await ffmpeg.deleteFile(inName); await ffmpeg.deleteFile(outName); }catch(e){}
     $('#cutResult').scrollIntoView({behavior:'smooth'});
   }catch(e){
     const el = $('#cutErr'); el.style.display='block';
-    el.textContent = e.message && e.message.includes('ملقيتش') || (e.message||'').includes('كله سكتة') ? e.message : 'حصلت مشكلة أثناء القص. لو الفيديو كبير جرّب تضغطه الأول أو تفتح الصفحة من موبايل أحدث.';
-    logLine('ERROR: '+(e.message||e));
+    const m = (e && e.message) || '';
+    el.textContent = (m.includes('ملقيتش') || m.includes('كله سكتة') || m.includes('يقرأ')) ? m : 'حصلت مشكلة أثناء القص. لو الفيديو كبير جرّب تضغطه الأول أو تفتح الصفحة من موبايل أحدث.';
+    logLine('ERROR: '+(m||e));
   }finally{
     btn.disabled = false;
   }
