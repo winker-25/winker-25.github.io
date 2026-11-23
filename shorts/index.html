@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>صانع الشورتس — سكريبت + قص السكتات</title>
+<title>صانع الشورتس — سكريبت + صور + فيديو + قص سكتات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -19,13 +19,13 @@
   header.app{text-align:center; padding:22px 0 6px}
   header.app h1{font-size:26px; font-weight:900}
   header.app p{color:var(--mut); font-size:14px; margin-top:4px}
-  .tabs{display:flex; gap:8px; margin:18px 0}
-  .tabs button{flex:1; padding:12px; border-radius:14px; border:1px solid var(--line); background:var(--card); color:var(--mut); font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; transition:.15s}
+  .tabs{display:flex; gap:6px; margin:18px 0}
+  .tabs button{flex:1; padding:11px 4px; border-radius:14px; border:1px solid var(--line); background:var(--card); color:var(--mut); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; transition:.15s}
   .tabs button.on{background:var(--acc); border-color:var(--acc); color:#fff}
   .card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px}
   label{display:block; font-size:14px; font-weight:700; margin:14px 0 6px; color:var(--txt)}
   label small{color:var(--mut); font-weight:400}
-  textarea,input[type=text]{width:100%; background:var(--card2); border:1px solid var(--line); border-radius:12px; color:var(--txt); font-family:inherit; font-size:16px; padding:12px; resize:vertical}
+  textarea,input[type=text],input[type=password]{width:100%; background:var(--card2); border:1px solid var(--line); border-radius:12px; color:var(--txt); font-family:inherit; font-size:16px; padding:12px; resize:vertical}
   textarea:focus,input:focus{outline:none; border-color:var(--acc)}
   .chips{display:flex; gap:8px; flex-wrap:wrap}
   .chips button{padding:9px 16px; border-radius:999px; border:1px solid var(--line); background:var(--card2); color:var(--mut); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer}
@@ -36,6 +36,7 @@
   .btn:disabled{opacity:.45; cursor:not-allowed}
   .btn.alt{background:var(--card2); border:1px solid var(--line); color:var(--txt); font-weight:700; font-size:15px; padding:12px}
   .btn.green{background:var(--acc2); color:#06281f}
+  .btn.mini{width:auto; padding:8px 14px; font-size:13px; margin-top:10px; border-radius:10px}
   .stat{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--line); font-size:14px}
   .stat:last-child{border-bottom:none}
   .stat b{color:var(--acc2)}
@@ -62,18 +63,33 @@
   .hidden{display:none}
   .rangeval{color:var(--acc2); font-weight:900}
   input[type=range]{width:100%; accent-color:var(--acc)}
+  details.set{background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-top:14px}
+  details.set summary{cursor:pointer; font-weight:700; font-size:14px; color:var(--mut)}
+  .engine{font-size:12px; font-weight:900; padding:3px 10px; border-radius:999px; display:inline-block}
+  .engine.gem{background:#0c2f27; color:var(--acc2)}
+  .engine.free{background:#33261a; color:var(--warn)}
+  .shot{background:var(--card2); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:12px}
+  .shot .num{font-size:12px; font-weight:900; color:var(--acc); margin-bottom:6px}
+  .shot .ar{line-height:1.9; font-size:15px}
+  .shot img{width:100%; border-radius:12px; margin-top:10px; background:#000; display:block}
+  .shot .imgload{width:100%; aspect-ratio:9/16; max-height:420px; border-radius:12px; margin-top:10px; background:#0a0d13; display:flex; align-items:center; justify-content:center; color:var(--mut); font-size:13px; text-align:center; padding:10px}
+  .promptbox{background:#0a0d13; border:1px solid var(--line); border-radius:10px; padding:10px; font-family:monospace; font-size:12px; direction:ltr; text-align:left; color:var(--mut); margin-top:10px; white-space:pre-wrap; word-break:break-word}
+  .shotgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px}
+  @media (max-width:420px){ .tabs button{font-size:12px} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="app">
     <h1>🎬 صانع الشورتس</h1>
-    <p>اكتب سكريبت بهوك ونهاية لولبية… واقصّ السكتات من الفيديو — كل ده في حتة واحدة</p>
+    <p>سكريبت بجيميناي + صور + برومبتات فيديو + قص السكتات — كل حاجة في حتة واحدة</p>
   </header>
 
   <div class="tabs">
     <button id="tabScript" class="on" type="button">✍️ السكريبت</button>
-    <button id="tabCut" type="button">✂️ قص السكتات</button>
+    <button id="tabImg" type="button">🖼️ الصور</button>
+    <button id="tabVid" type="button">🎬 الفيديو</button>
+    <button id="tabCut" type="button">✂️ القص</button>
   </div>
 
   <!-- ===== SCRIPT PLANNER ===== -->
@@ -94,6 +110,22 @@
       <input type="range" id="wpm" min="100" max="180" value="130">
       <div class="note">العامية المصرية في الفويس أوفر بتبقى عادة بين 120 و140 كلمة في الدقيقة. الهدف: <b id="targetWords" style="color:var(--acc2)">65</b> كلمة.</div>
 
+      <label>ستايل الصور والفيديو</label>
+      <div class="chips" id="styleChips">
+        <button type="button" data-s="realistic" class="on">واقعي</button>
+        <button type="button" data-s="anime">أنمي 3D</button>
+        <button type="button" data-s="none">من غير ستايل</button>
+      </div>
+
+      <details class="set" id="gemSet">
+        <summary>⚙️ إعدادات جيميناي <span class="engine free" id="engineBadge">الوضع المجاني</span></summary>
+        <label style="margin-top:12px">مفتاح Gemini API <small>(بيتخزن على جهازك بس، ومبيتبعتش لأي حتة غير جوجل)</small></label>
+        <input type="password" id="gemKey" placeholder="الصق المفتاح هنا مرة واحدة" autocomplete="off">
+        <button class="btn alt mini" id="saveKey" type="button">حفظ المفتاح</button>
+        <button class="btn alt mini" id="clearKey" type="button">مسح</button>
+        <div class="note">بالمفتاح: السكريبت بيتكتب بجيميناي (أجود بكتير). من غيره: موديل مجاني، اعتبره مسودة.</div>
+      </details>
+
       <button class="btn" id="genBtn" type="button">⚡ اكتب السكريبت</button>
       <div class="err" id="scriptErr"></div>
     </div>
@@ -102,13 +134,44 @@
       <div class="stat"><span>عدد الكلمات الكلي</span><b id="stWords">—</b></div>
       <div class="stat"><span>المدة التقديرية على سرعتك</span><b id="stDur">—</b></div>
       <div class="stat"><span>الهوك</span><b id="stHook">—</b></div>
+      <div class="stat"><span>المحرك</span><b id="stEngine">—</b></div>
 
       <div id="secsOut"></div>
 
       <div class="loopbox" id="loopBox"></div>
 
       <button class="btn green" id="copyBtn" type="button">📋 نسخ السكريبت كله</button>
+      <button class="btn" id="toVisuals" type="button">🖼️🎬 حضّر الصور وبرومبتات الفيديو</button>
       <button class="btn alt" id="regenBtn" type="button">🔄 جرّب نسخة تانية</button>
+    </div>
+  </section>
+
+  <!-- ===== IMAGES ===== -->
+  <section id="pageImg" class="hidden">
+    <div class="card" id="imgEmpty">
+      <div class="note">اكتب سكريبت في تاب السكريبت الأول ودوس «حضّر الصور وبرومبتات الفيديو» — أو ولّد صورة لوحدها تحت.</div>
+    </div>
+    <div class="card hidden" id="imgCard">
+      <label>ستايل الصور: <span class="rangeval" id="imgStyleName">واقعي</span></label>
+      <div id="shotsImg"></div>
+    </div>
+    <div class="card">
+      <label>صورة لوحدها <small>(اكتب وصفها عربي أو إنجليزي)</small></label>
+      <textarea id="freeImgPrompt" rows="2" placeholder="مثال: طفلة كرتون قاعدة في أوضة نومها بالليل مكسوفة"></textarea>
+      <button class="btn alt" id="freeImgBtn" type="button">🖼️ ولّد الصورة</button>
+      <div id="freeImgOut"></div>
+    </div>
+  </section>
+
+  <!-- ===== VIDEO PROMPTS ===== -->
+  <section id="pageVid" class="hidden">
+    <div class="card" id="vidEmpty">
+      <div class="note">اكتب سكريبت في تاب السكريبت الأول ودوس «حضّر الصور وبرومبتات الفيديو»، وهتلاقي هنا برومبت إنجليزي جاهز لكل مشهد تلزقه في Google Flow أو Veo.</div>
+    </div>
+    <div class="card hidden" id="vidCard">
+      <div class="note">كل برومبت جاهز يلتصق في <b>Google Flow</b> بحسابك (بيكلّف كريدت)، أو في أي مولد فيديو تاني. الفويس أوفر بالمصري مكتوب تحت كل مشهد.</div>
+      <div id="shotsVid"></div>
+      <button class="btn green" id="copyAllVid" type="button">📋 نسخ كل البرومبتات</button>
     </div>
   </section>
 
@@ -161,7 +224,7 @@
 </div>
 
 <script>
-/* ---------- tabs ---------- */
+/* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
 function chipGroup(el, cb){
   el.addEventListener('click', e=>{
@@ -170,15 +233,46 @@ function chipGroup(el, cb){
     b.classList.add('on'); cb && cb(b);
   });
 }
-$('#tabScript').onclick = ()=>{ $('#tabScript').classList.add('on'); $('#tabCut').classList.remove('on'); $('#pageScript').classList.remove('hidden'); $('#pageCut').classList.add('hidden'); };
-$('#tabCut').onclick = ()=>{ $('#tabCut').classList.add('on'); $('#tabScript').classList.remove('on'); $('#pageCut').classList.remove('hidden'); $('#pageScript').classList.add('hidden'); };
+const TABS = [['tabScript','pageScript'],['tabImg','pageImg'],['tabVid','pageVid'],['tabCut','pageCut']];
+function showTab(id){
+  TABS.forEach(([t,p])=>{ $('#'+t).classList.toggle('on', t===id); $('#'+p).classList.toggle('hidden', t!==id); });
+}
+TABS.forEach(([t])=>{ $('#'+t).onclick = ()=>showTab(t); });
+
+/* ---------- gemini key ---------- */
+const KEY_STORE = 'shorts_gemini_key';
+function getKey(){ return (localStorage.getItem(KEY_STORE)||'').trim(); }
+function refreshEngineBadge(){
+  const b = $('#engineBadge');
+  if(getKey()){ b.textContent = 'جيميناي شغال ⚡'; b.className = 'engine gem'; }
+  else { b.textContent = 'الوضع المجاني'; b.className = 'engine free'; }
+}
+$('#gemKey').value = getKey();
+$('#saveKey').onclick = ()=>{
+  const v = $('#gemKey').value.trim();
+  if(v) localStorage.setItem(KEY_STORE, v);
+  refreshEngineBadge();
+  $('#saveKey').textContent = '✅ اتحفظ';
+  setTimeout(()=>$('#saveKey').textContent='حفظ المفتاح',1500);
+};
+$('#clearKey').onclick = ()=>{
+  localStorage.removeItem(KEY_STORE); $('#gemKey').value=''; refreshEngineBadge();
+};
+refreshEngineBadge();
 
 /* ---------- script planner ---------- */
-let dur = 30, wpm = 130;
-const words = t => (t.trim().match(/[\u0600-\u06FF\w]+/g)||[]).length;
+let dur = 30, wpm = 130, style = 'realistic';
+const STYLE_TXT = {
+  realistic: 'ultra-realistic cinematic footage, natural lighting, vertical 9:16',
+  anime: 'high-quality 3D anime style animation, Pixar-like, warm colors, vertical 9:16',
+  none: ''
+};
+const STYLE_AR = { realistic:'واقعي', anime:'أنمي 3D', none:'حر' };
+const words = t => (t.trim().match(/[؀-ۿ\w]+/g)||[]).length;
 function targetWords(){ return Math.round(dur * wpm / 60); }
 function refreshTarget(){ $('#wpmVal').textContent = wpm; $('#targetWords').textContent = targetWords(); }
 chipGroup($('#durChips'), b=>{ dur = +b.dataset.d; refreshTarget(); });
+chipGroup($('#styleChips'), b=>{ style = b.dataset.s; $('#imgStyleName').textContent = STYLE_AR[style]; });
 $('#wpm').addEventListener('input', e=>{ wpm = +e.target.value; refreshTarget(); });
 refreshTarget();
 
@@ -189,29 +283,69 @@ function extractJSON(txt){
   return JSON.parse(t.slice(a,b+1));
 }
 
-async function callAI(topic){
-  const tw = targetWords();
-  const sys = 'انت كاتب سكريبت محترف لفيديوهات شورتس بالعامية المصرية. بترد بصيغة JSON فقط بدون أي كلام زيادة.';
-  const usr = 'اكتب سكريبت فيديو شورت مدته '+dur+' ثانية عن الموضوع: «'+topic+'».\n'+
-  'عدد الكلمات المستهدف حوالي '+tw+' كلمة بالعامية المصرية الطبيعية.\n'+
-  'القواعد:\n'+
-  '1. "hook": جملة افتتاحية تخطف المشاهد في أول 3 ثواني (حتى 12 كلمة).\n'+
-  '2. "scenes": مصفوفة من 3 لـ 6 جمل قصيرة تبني الموضوع بسرعة، كل جملة معلومة واحدة.\n'+
-  '3. "ending": جملة أخيرة غير مكتملة المعنى بحيث لو اتقرأت وراها جملة الـ hook تكملها بشكل طبيعي، عشان المشاهد يعيد الفيديو من غير ما يحس (الحلقة اللانهائية).\n'+
-  'رجّع JSON بالشكل ده بالظبط: {"hook":"...","scenes":["...","..."],"ending":"..."}';
+/* ---------- text engines ---------- */
+const GEMINI_MODELS = ['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-3.1-flash-lite'];
+async function geminiText(sys, usr){
+  const key = getKey(); if(!key) throw new Error('no key');
+  let lastErr = null;
+  for(const m of GEMINI_MODELS){
+    try{
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-goog-api-key':key},
+        body: JSON.stringify({
+          systemInstruction:{parts:[{text:sys}]},
+          contents:[{role:'user',parts:[{text:usr}]}],
+          generationConfig:{temperature:0.9, responseMimeType:'application/json'}
+        })
+      });
+      if(!res.ok){ lastErr = new Error(m+': '+res.status); continue; }
+      const j = await res.json();
+      const parts = (((j.candidates||[])[0]||{}).content||{}).parts || [];
+      const txt = parts.map(p=>p.text||'').join('');
+      if(!txt.trim()){ lastErr = new Error(m+': empty'); continue; }
+      return txt;
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('gemini failed');
+}
+async function freeText(sys, usr){
   const res = await fetch('https://text.pollinations.ai/', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({model:'openai', private:true, messages:[{role:'system',content:sys},{role:'user',content:usr}]})
   });
   if(!res.ok) throw new Error('السيرفر رجّع خطأ '+res.status);
-  return extractJSON(await res.text());
+  return res.text();
+}
+let lastEngine = 'free';
+async function smartText(sys, usr){
+  if(getKey()){
+    try{ const t = await geminiText(sys, usr); lastEngine='gemini'; return t; }
+    catch(e){ /* fall through to free */ }
+  }
+  lastEngine = 'free';
+  return freeText(sys, usr);
 }
 
-let lastScript = null;
+async function callAI(topic){
+  const tw = targetWords();
+  const sys = 'You are a professional short-video scriptwriter for Egyptian creators. You write voiceover scripts in natural Egyptian Colloquial Arabic (عامية مصرية). You answer with JSON only, no extra words.';
+  const usr = 'Write a '+dur+'-second short-video voiceover script about: "'+topic+'".\n'+
+  'Target length: about '+tw+' words in natural Egyptian Colloquial Arabic (NOT Modern Standard Arabic — write it the way people actually talk in Egypt).\n'+
+  'Rules:\n'+
+  '1. "hook": an opening line that grabs the viewer in the first 3 seconds (max 12 words).\n'+
+  '2. "scenes": an array of 3 to 6 short build-up lines, one idea per line, fast pacing.\n'+
+  '3. "ending": a final line that is deliberately incomplete so that when the hook line is read right after it, it continues its meaning naturally — a seamless infinite loop that makes viewers rewatch without noticing.\n'+
+  'All text values must be in Egyptian Colloquial Arabic.\n'+
+  'Return JSON exactly in this shape: {"hook":"...","scenes":["...","..."],"ending":"..."}';
+  return extractJSON(await smartText(sys, usr));
+}
+
+let lastScript = null, lastBreakdown = null;
 function fmtSec(s){ return s<60 ? Math.round(s)+' ثانية' : Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0')+' دقيقة'; }
 
 function renderScript(d){
-  lastScript = d;
+  lastScript = d; lastBreakdown = null;
   const hook = String(d.hook||'').trim();
   const scenes = Array.isArray(d.scenes)? d.scenes.map(s=>String(s).trim()).filter(Boolean) : [];
   const ending = String(d.ending||'').trim();
@@ -221,6 +355,7 @@ function renderScript(d){
   $('#stWords').textContent = totalW+' كلمة (الهدف '+targetWords()+')';
   $('#stDur').textContent = fmtSec(est);
   $('#stHook').textContent = words(hook)+' كلمة / ~'+Math.round(words(hook)/wpm*60)+' ث';
+  $('#stEngine').textContent = lastEngine==='gemini' ? 'Gemini ⚡' : 'المجاني';
   let html = '<div class="sec"><span class="tag hook">🎯 الهوك — أول 3 ثواني</span><p>'+hook+'</p></div>';
   scenes.forEach((s,i)=>{
     html += '<div class="sec"><span class="tag build">🧱 بناء '+(i+1)+' — ~'+Math.round(words(s)/wpm*60)+' ث</span><p>'+s+'</p></div>';
@@ -262,6 +397,138 @@ $('#copyBtn').onclick = async ()=>{
   }
   $('#copyBtn').textContent = '✅ اتنسخ!';
   setTimeout(()=>$('#copyBtn').textContent='📋 نسخ السكريبت كله',1500);
+};
+
+/* ---------- visual breakdown (images + video prompts) ---------- */
+async function buildBreakdown(){
+  if(!lastScript) throw new Error('no script');
+  const d = lastScript;
+  const lines = [d.hook].concat(d.scenes||[]).concat([d.ending]);
+  const styleTxt = STYLE_TXT[style];
+  const sys = 'You are a visual director for vertical short videos. You answer with JSON only, no extra words.';
+  const usr = 'Here is a short-video voiceover script in Egyptian Arabic, line by line:\n'+
+    lines.map((l,i)=>(i+1)+'. '+l).join('\n')+
+    '\n\nFor EACH line, in the same order, produce:\n'+
+    '- "arabic": the exact same Arabic line, unchanged.\n'+
+    '- "image_prompt": a detailed English prompt for a vertical 9:16 still image illustrating this exact moment.'+(styleTxt?' Style: '+styleTxt+'.':'')+'\n'+
+    '- "video_prompt": a detailed English prompt for an AI video generator (Google Flow / Veo) for this moment: subject, action, camera movement, lighting, mood. If Arabic text should appear on screen, include it in quotes exactly. Vertical 9:16.'+(styleTxt?' Style: '+styleTxt+'.':'')+'\n'+
+    'Return JSON exactly: {"shots":[{"arabic":"...","image_prompt":"...","video_prompt":"..."}]} with exactly '+lines.length+' shots.';
+  const j = extractJSON(await smartText(sys, usr));
+  if(!Array.isArray(j.shots) || !j.shots.length) throw new Error('bad breakdown');
+  j.shots.forEach((s,i)=>{ if(!s.arabic) s.arabic = lines[Math.min(i, lines.length-1)]; });
+  lastBreakdown = j.shots;
+  return j.shots;
+}
+
+function pollinationsURL(prompt, seed){
+  return 'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?width=720&height=1280&nologo=true&seed='+seed+'&model=flux';
+}
+
+function renderImages(){
+  const shots = lastBreakdown||[];
+  $('#imgEmpty').classList.toggle('hidden', shots.length>0);
+  $('#imgCard').classList.toggle('hidden', shots.length===0);
+  $('#imgStyleName').textContent = STYLE_AR[style];
+  let html = '';
+  shots.forEach((s,i)=>{
+    const label = i===0 ? '🎯 صورة الهوك (تنفع ثامبنيل)' : (i===shots.length-1 ? '♾️ النهاية' : '🧱 مشهد '+i);
+    html += '<div class="shot"><div class="num">'+label+'</div><div class="ar">'+s.arabic+'</div>'+
+      '<div class="imgload" id="imgwait'+i+'">الصورة بتحمّل…</div>'+
+      '<img id="img'+i+'" style="display:none" alt="">'+
+      '<div class="promptbox">'+s.image_prompt+'</div>'+
+      '<button class="btn alt mini" data-copy="'+i+'" type="button">📋 نسخ برومبت الصورة</button></div>';
+  });
+  $('#shotsImg').innerHTML = html;
+  shots.forEach((s,i)=>{
+    const img = document.getElementById('img'+i);
+    const wait = document.getElementById('imgwait'+i);
+    img.onload = ()=>{ wait.style.display='none'; img.style.display='block'; };
+    img.onerror = ()=>{ wait.textContent = 'الصورة فشلت، جرّب تاني بعد شوية.'; };
+    img.src = pollinationsURL(s.image_prompt, 1000+i*17+Math.floor(Math.random()*999));
+  });
+  $('#shotsImg').querySelectorAll('[data-copy]').forEach(b=>{
+    b.onclick = async ()=>{
+      const p = lastBreakdown[+b.dataset.copy].image_prompt;
+      try{ await navigator.clipboard.writeText(p); b.textContent='✅ اتنسخ'; }
+      catch(e){ b.textContent='افتح البرومبت وانسخه يدوي'; }
+      setTimeout(()=>b.textContent='📋 نسخ برومبت الصورة',1500);
+    };
+  });
+}
+
+function renderVideo(){
+  const shots = lastBreakdown||[];
+  $('#vidEmpty').classList.toggle('hidden', shots.length>0);
+  $('#vidCard').classList.toggle('hidden', shots.length===0);
+  let html = '';
+  shots.forEach((s,i)=>{
+    const label = i===0 ? '🎯 مشهد 1 (الهوك)' : (i===shots.length-1 ? '♾️ مشهد '+shots.length+' (النهاية)' : '🧱 مشهد '+(i+1));
+    html += '<div class="shot"><div class="num">'+label+'</div><div class="ar">🎙️ '+s.arabic+'</div>'+
+      '<div class="promptbox">'+s.video_prompt+'</div>'+
+      '<button class="btn alt mini" data-vcopy="'+i+'" type="button">📋 نسخ البرومبت</button></div>';
+  });
+  $('#shotsVid').innerHTML = html;
+  $('#shotsVid').querySelectorAll('[data-vcopy]').forEach(b=>{
+    b.onclick = async ()=>{
+      const s = lastBreakdown[+b.dataset.vcopy];
+      const p = s.video_prompt+'\nVoiceover (Egyptian Arabic): "'+s.arabic+'"';
+      try{ await navigator.clipboard.writeText(p); b.textContent='✅ اتنسخ'; }
+      catch(e){ b.textContent='افتح البرومبت وانسخه يدوي'; }
+      setTimeout(()=>b.textContent='📋 نسخ البرومبت',1500);
+    };
+  });
+}
+$('#copyAllVid').onclick = async ()=>{
+  if(!lastBreakdown) return;
+  const txt = lastBreakdown.map((s,i)=>'Scene '+(i+1)+':\n'+s.video_prompt+'\nVoiceover (Egyptian Arabic): "'+s.arabic+'"').join('\n\n');
+  try{ await navigator.clipboard.writeText(txt); $('#copyAllVid').textContent='✅ اتنسخ الكل!'; }
+  catch(e){ $('#copyAllVid').textContent='انسخ يدوي من الكروت'; }
+  setTimeout(()=>$('#copyAllVid').textContent='📋 نسخ كل البرومبتات',1500);
+};
+
+let visualsBusy = false;
+async function prepareVisuals(){
+  if(!lastScript || visualsBusy) return;
+  visualsBusy = true;
+  const btn = $('#toVisuals'); btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> بيحضّر الصور والبرومبتات…';
+  try{
+    await buildBreakdown();
+    renderImages(); renderVideo();
+    showTab('tabImg');
+  }catch(e){
+    btn.textContent = 'حصلت مشكلة — دوس تاني للمحاولة';
+    btn.disabled = false; visualsBusy = false;
+    return;
+  }
+  btn.disabled = false; btn.textContent = '🖼️🎬 حضّر الصور وبرومبتات الفيديو';
+  visualsBusy = false;
+}
+$('#toVisuals').onclick = prepareVisuals;
+
+/* free single image */
+$('#freeImgBtn').onclick = async ()=>{
+  const q = $('#freeImgPrompt').value.trim(); if(!q) return;
+  const btn = $('#freeImgBtn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> بيولّد…';
+  try{
+    let prompt = q;
+    if(/[؀-ۿ]/.test(q)){
+      const t = await smartText(
+        'You translate and expand short Arabic descriptions into detailed English image-generation prompts. JSON only.',
+        'Turn this description into one detailed English prompt for a vertical 9:16 image'+(STYLE_TXT[style]?' in this style: '+STYLE_TXT[style]:'')+'. Description: "'+q+'". Return JSON: {"prompt":"..."}');
+      prompt = extractJSON(t).prompt || q;
+    }
+    const url = pollinationsURL(prompt, Math.floor(Math.random()*99999));
+    $('#freeImgOut').innerHTML = '<div class="shot"><div class="imgload" id="fwait">الصورة بتحمّل…</div><img id="fimg" style="display:none"><div class="promptbox">'+prompt+'</div></div>';
+    const img = document.getElementById('fimg');
+    img.onload = ()=>{ document.getElementById('fwait').style.display='none'; img.style.display='block'; };
+    img.onerror = ()=>{ document.getElementById('fwait').textContent='فشلت، جرّب تاني.'; };
+    img.src = url;
+  }catch(e){
+    $('#freeImgOut').innerHTML = '<div class="err" style="display:block">حصلت مشكلة. جرّب تاني.</div>';
+  }finally{
+    btn.disabled = false; btn.textContent = '🖼️ ولّد الصورة';
+  }
 };
 
 /* ---------- silence cutter (ffmpeg.wasm 0.12) ---------- */
