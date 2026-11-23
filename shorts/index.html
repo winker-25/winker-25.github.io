@@ -424,6 +424,38 @@ function pollinationsURL(prompt, seed){
   return 'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?width=720&height=1280&nologo=true&seed='+seed+'&model=flux';
 }
 
+/* fetch image via CORS and reject the free-tier "rate limit" placeholder (mostly flat yellow) */
+async function fetchRealImage(url){
+  try{
+    const res = await fetch(url);
+    if(!res.ok) return 'err';
+    const blob = await res.blob();
+    const bmp = await createImageBitmap(blob);
+    const w=64,h=64, c=document.createElement('canvas'); c.width=w; c.height=h;
+    const ctx=c.getContext('2d'); ctx.drawImage(bmp,0,0,w,h);
+    const d=ctx.getImageData(0,0,w,h).data;
+    let yellow=0;
+    for(let i=0;i<d.length;i+=4){ if(d[i]>200&&d[i+1]>170&&d[i+2]<120) yellow++; }
+    if(yellow/(w*h)>0.5) return 'limited';
+    return URL.createObjectURL(blob);
+  }catch(e){ return 'err'; }
+}
+async function loadShotImage(img, wait, prompt, baseSeed, idxTxt){
+  for(let attempt=0; attempt<4; attempt++){
+    wait.textContent = idxTxt+' بتحمّل…'+(attempt?' (محاولة '+(attempt+1)+')':'');
+    const r = await fetchRealImage(pollinationsURL(prompt, baseSeed+attempt*7919+Math.floor(Math.random()*999)));
+    if(r!=='limited' && r!=='err'){ img.src=r; wait.style.display='none'; img.style.display='block'; return true; }
+    if(r==='limited'){
+      wait.textContent = idxTxt+': الخدمة المجانية مضغوطة شوية، بيستنى وبيكمّل لوحده…';
+      await new Promise(x=>setTimeout(x,47000));
+    }else{
+      await new Promise(x=>setTimeout(x,4000));
+    }
+  }
+  wait.textContent = idxTxt+' فشلت دلوقتي — الخدمة المجانية مضغوطة، جرّب بعد شوية.';
+  return false;
+}
+
 function renderImages(){
   const shots = lastBreakdown||[];
   $('#imgEmpty').classList.toggle('hidden', shots.length>0);
@@ -439,23 +471,13 @@ function renderImages(){
       '<button class="btn alt mini" data-copy="'+i+'" type="button">📋 نسخ برومبت الصورة</button></div>';
   });
   $('#shotsImg').innerHTML = html;
-  // load sequentially: parallel bursts hit the free image service's per-IP limit
+  // load sequentially with placeholder detection: parallel bursts hit the free service's per-IP limit
   (async ()=>{
     for(let i=0;i<shots.length;i++){
       const img = document.getElementById('img'+i);
       const wait = document.getElementById('imgwait'+i);
       if(!img) break;
-      for(let attempt=0; attempt<2; attempt++){
-        const ok = await new Promise(res=>{
-          const to = setTimeout(()=>res(false), 90000);
-          img.onload = ()=>{ clearTimeout(to); res(true); };
-          img.onerror = ()=>{ clearTimeout(to); res(false); };
-          wait.textContent = 'الصورة '+(i+1)+' من '+shots.length+' بتحمّل…'+(attempt?' (محاولة تانية)':'');
-          img.src = pollinationsURL(shots[i].image_prompt, 1000+i*17+Math.floor(Math.random()*999)+attempt*7919);
-        });
-        if(ok){ wait.style.display='none'; img.style.display='block'; break; }
-        if(attempt===1) wait.textContent = 'الصورة دي فشلت دلوقتي — الخدمة المجانية بتضغط ساعات، جرّب بعد شوية.';
-      }
+      await loadShotImage(img, wait, shots[i].image_prompt, 1000+i*17, 'الصورة '+(i+1)+' من '+shots.length);
       await new Promise(r=>setTimeout(r,1200));
     }
   })();
@@ -531,12 +553,8 @@ $('#freeImgBtn').onclick = async ()=>{
         'Turn this description into one detailed English prompt for a vertical 9:16 image'+(STYLE_TXT[style]?' in this style: '+STYLE_TXT[style]:'')+'. Description: "'+q+'". Return JSON: {"prompt":"..."}');
       prompt = extractJSON(t).prompt || q;
     }
-    const url = pollinationsURL(prompt, Math.floor(Math.random()*99999));
     $('#freeImgOut').innerHTML = '<div class="shot"><div class="imgload" id="fwait">الصورة بتحمّل…</div><img id="fimg" style="display:none"><div class="promptbox">'+prompt+'</div></div>';
-    const img = document.getElementById('fimg');
-    img.onload = ()=>{ document.getElementById('fwait').style.display='none'; img.style.display='block'; };
-    img.onerror = ()=>{ document.getElementById('fwait').textContent='فشلت، جرّب تاني.'; };
-    img.src = url;
+    await loadShotImage(document.getElementById('fimg'), document.getElementById('fwait'), prompt, Math.floor(Math.random()*99999), 'الصورة');
   }catch(e){
     $('#freeImgOut').innerHTML = '<div class="err" style="display:block">حصلت مشكلة. جرّب تاني.</div>';
   }finally{
