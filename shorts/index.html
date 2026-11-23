@@ -439,13 +439,26 @@ function renderImages(){
       '<button class="btn alt mini" data-copy="'+i+'" type="button">📋 نسخ برومبت الصورة</button></div>';
   });
   $('#shotsImg').innerHTML = html;
-  shots.forEach((s,i)=>{
-    const img = document.getElementById('img'+i);
-    const wait = document.getElementById('imgwait'+i);
-    img.onload = ()=>{ wait.style.display='none'; img.style.display='block'; };
-    img.onerror = ()=>{ wait.textContent = 'الصورة فشلت، جرّب تاني بعد شوية.'; };
-    img.src = pollinationsURL(s.image_prompt, 1000+i*17+Math.floor(Math.random()*999));
-  });
+  // load sequentially: parallel bursts hit the free image service's per-IP limit
+  (async ()=>{
+    for(let i=0;i<shots.length;i++){
+      const img = document.getElementById('img'+i);
+      const wait = document.getElementById('imgwait'+i);
+      if(!img) break;
+      for(let attempt=0; attempt<2; attempt++){
+        const ok = await new Promise(res=>{
+          const to = setTimeout(()=>res(false), 90000);
+          img.onload = ()=>{ clearTimeout(to); res(true); };
+          img.onerror = ()=>{ clearTimeout(to); res(false); };
+          wait.textContent = 'الصورة '+(i+1)+' من '+shots.length+' بتحمّل…'+(attempt?' (محاولة تانية)':'');
+          img.src = pollinationsURL(shots[i].image_prompt, 1000+i*17+Math.floor(Math.random()*999)+attempt*7919);
+        });
+        if(ok){ wait.style.display='none'; img.style.display='block'; break; }
+        if(attempt===1) wait.textContent = 'الصورة دي فشلت دلوقتي — الخدمة المجانية بتضغط ساعات، جرّب بعد شوية.';
+      }
+      await new Promise(r=>setTimeout(r,1200));
+    }
+  })();
   $('#shotsImg').querySelectorAll('[data-copy]').forEach(b=>{
     b.onclick = async ()=>{
       const p = lastBreakdown[+b.dataset.copy].image_prompt;
