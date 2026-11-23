@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/umd/ffmpeg.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/umd/index.js"></script>
 <style>
   :root{
     --bg:#0d1117; --card:#161b26; --card2:#1c2333; --line:#2a3348;
@@ -268,6 +267,8 @@ $('#copyBtn').onclick = async ()=>{
 /* ---------- silence cutter (ffmpeg.wasm 0.12) ---------- */
 let db = -30, minSil = 0.5, inFile = null, ffmpeg = null, ffReady = false, ffLoading = false;
 const CORE_BASE = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
+async function toBlobURL(url, mime){ const b = await (await fetch(url)).blob(); return URL.createObjectURL(new Blob([b], {type: mime})); }
+async function fetchFile(f){ if(typeof f === 'string'){ return new Uint8Array(await (await fetch(f)).arrayBuffer()); } return new Uint8Array(await f.arrayBuffer()); }
 chipGroup($('#dbChips'), b=>{ db = +b.dataset.v; });
 chipGroup($('#minChips'), b=>{ minSil = +b.dataset.v; });
 
@@ -304,8 +305,8 @@ async function ensureFF(){
   ffmpeg = new FFmpegWASM.FFmpeg();
   ffmpeg.on('log', ({message})=>logLine(message));
   await ffmpeg.load({
-    coreURL: await FFmpegUtil.toBlobURL(CORE_BASE+'/ffmpeg-core.js','text/javascript'),
-    wasmURL: await FFmpegUtil.toBlobURL(CORE_BASE+'/ffmpeg-core.wasm','application/wasm')
+    coreURL: await toBlobURL(CORE_BASE+'/ffmpeg-core.js','text/javascript'),
+    wasmURL: await toBlobURL(CORE_BASE+'/ffmpeg-core.wasm','application/wasm')
   });
   ffReady = true;
 }
@@ -340,7 +341,7 @@ async function cutSilence(){
       v.onerror = ()=>rej(new Error('مش قادر يقرأ الفيديو ده'));
       v.src = URL.createObjectURL(inFile);
     });
-    await ffmpeg.writeFile(inName, await FFmpegUtil.fetchFile(inFile));
+    await ffmpeg.writeFile(inName, await fetchFile(inFile));
 
     // 1) detect silences
     prog(0.15,'بيدور على السكتات…');
